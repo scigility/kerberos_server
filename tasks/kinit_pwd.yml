@@ -1,0 +1,19 @@
+---
+## Self-contained include tasks (independent of the role) to run the kinit with a password
+## Include parameters:
+## - "_realm_name": the kerberos realm name
+## - "_principal": the principal without the realm
+## - "_kinit_password": the password given to kinit
+## - "_kinit_user": (optional) run the kinit as the given user
+## - "_kinit_opts": (optional) arguments to kinit
+
+- name: Run kinit for user
+  shell: |
+        set -o pipefail;
+        echo '{{ _kinit_password }}' | kinit {{ _kinit_opts|default('') }} {{ _principal }}@{{ _realm_name }}
+  become_user: "{{ _kinit_user | default(omit) }}"
+  become: "{{ _kinit_user is defined }}"
+  no_log: True
+  register: kinit_result
+  changed_when:
+    - kinit_result.stderr | default(False)

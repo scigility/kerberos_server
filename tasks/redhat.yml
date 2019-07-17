@@ -74,6 +74,20 @@
   no_log: true
   with_items: "{{ kerberos_server_users }}"
 
+- name: Test kinit for the created users
+  include_tasks: kinit_pwd.yml
+  vars:
+    _realm_name: "{{ kerberos_server_realm_name }}"
+    _principal: "{{ item.name }}"
+    _kinit_user: "{{ item.name }}"
+    _kinit_password: "{{ item.password }}"
+  no_log: true
+  when:
+    - is_master_host
+    - kerberos_server_kinit_check
+    - item.state == 'present'
+  loop: "{{ kerberos_server_users }}"
+
 # Configure the optional kprop replication
 - import_tasks: kprop_replication.yml
   when:
